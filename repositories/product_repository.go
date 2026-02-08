@@ -10,13 +10,23 @@ type ProductRepository struct {
 	db *sql.DB
 }
 
+func (repo *ProductRepository) CreateTransaction(items []models.CheckoutItem) (*models.Transaction, error) {
+	panic("unimplemented")
+}
+
 func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (repo *ProductRepository) GetAll() ([]models.Product, error) {
+func (repo *ProductRepository) GetAll(nameFilter string) ([]models.Product, error) {
 	query := "SELECT id, name, price, stock FROM products"
-	rows, err := repo.db.Query(query)
+	args := []interface{}{}
+	if nameFilter != "" {
+		query += " WHERE products.name ILIKE $1"
+		args = append(args, "%"+nameFilter+"%")
+	}
+
+	rows, err := repo.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
